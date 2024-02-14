@@ -16,28 +16,28 @@ describe("num/1", () => {
 
 describe("eq/2, neq/2, lt/2, gt/2, leq/2, geq/2", () => {
    test('eq false 1', expectToBeFalse(session, intervalsPro, "eq(3.0, 4).")) ;
-    test('eq false 2', expectToBeFalse(session, intervalsPro, "eq(ninf, inf).")) ;
-    test('eq false 3', expectToBeFalse(session, intervalsPro, "eq(ninf, 4).")) ;
+    test('eq false 2', expectToBeFalse(session, intervalsPro, "eq(-inf, inf).")) ;
+    test('eq false 3', expectToBeFalse(session, intervalsPro, "eq(-inf, 4).")) ;
     test('eq false 4', expectToBeFalse(session, intervalsPro, "eq(4.0, nan).")) ;
-    test('eq 1', expectToBeTrue(session, intervalsPro, "eq(ninf, ninf).")) ;
+    test('eq 1', expectToBeTrue(session, intervalsPro, "eq(-inf, -inf).")) ;
     test('eq 2', expectToBeTrue(session, intervalsPro, "eq(4.0, 4).")) ;
 
     test('neq 1', expectToBeTrue(session, intervalsPro, "neq(3.0, 4).")) ;
-    test('neq 2', expectToBeTrue(session, intervalsPro, "neq(ninf, inf).")) ;
-    test('neq 3', expectToBeTrue(session, intervalsPro, "neq(ninf, 4).")) ;
+    test('neq 2', expectToBeTrue(session, intervalsPro, "neq(-inf, inf).")) ;
+    test('neq 3', expectToBeTrue(session, intervalsPro, "neq(-inf, 4).")) ;
     test('neq 4', expectToBeTrue(session, intervalsPro, "neq(4.0, nan).")) ;
-    test('neq false 1', expectToBeFalse(session, intervalsPro, "neq(ninf, ninf)."));
+    test('neq false 1', expectToBeFalse(session, intervalsPro, "neq(-inf, -inf)."));
     test('neq false 2', expectToBeFalse(session, intervalsPro, "neq(4.0, 4)."));
 
     test('lt 1', expectToBeTrue(session, intervalsPro, "lt(1, 2.0)."));
     test('lt 2', expectToBeTrue(session, intervalsPro, "lt(1, 10)."));
     test('lt 3', expectToBeTrue(session, intervalsPro, "lt(1, inf)."));
-    test('lt 4', expectToBeTrue(session, intervalsPro, "lt(ninf, inf)."));
-    test('lt 5', expectToBeTrue(session, intervalsPro, "lt(ninf, -0.9)."));
+    test('lt 4', expectToBeTrue(session, intervalsPro, "lt(-inf, inf)."));
+    test('lt 5', expectToBeTrue(session, intervalsPro, "lt(-inf, -0.9)."));
     test('lt false 1', expectToBeFalse(session, intervalsPro, "lt(2, 1.0)."));
     test('lt false 2', expectToBeFalse(session, intervalsPro, "lt(inf, 2.0)."));
-    test('lt false 3', expectToBeFalse(session, intervalsPro, "lt(inf, ninf)."));
-    test('lt false 4', expectToBeFalse(session, intervalsPro, "lt(ninf, ninf)."));
+    test('lt false 3', expectToBeFalse(session, intervalsPro, "lt(inf, -inf)."));
+    test('lt false 4', expectToBeFalse(session, intervalsPro, "lt(-inf, -inf)."));
 
     test('gt', expectToBeTrue(session, intervalsPro, "gt(3, 2.0)."));
     test('gt false', expectToBeFalse(session, intervalsPro, "gt(1, 2.0)."));
@@ -54,14 +54,16 @@ describe("min/3, max/3", () => {
     test('min', expectToBeTrue(session, intervalsPro,  "min(4, 3, 3)."));
     test('min false', expectToBeFalse(session, intervalsPro,  "min(4, 3, 4)."));
     test('min search', expectOutputToBe(session, intervalsPro,  "min(4, 3, R).", ["R = 3"]));
+    test('min search 2', expectOutputToBe(session, intervalsPro,  "min(-inf, -inf, R).", ["R = - inf"]));
 
     test('max 1', expectToBeTrue(session, intervalsPro,  "max(4, 3, 4)."));
-    test('max 2', expectToBeTrue(session, intervalsPro,  "max(ninf, 3, 3)."));
+    test('max 2', expectToBeTrue(session, intervalsPro,  "max(-inf, 3, 3)."));
     test('max 3', expectToBeTrue(session, intervalsPro,  "max(4, inf, inf)."));
     test('max false ', expectToBeFalse(session, intervalsPro,  "max(4, 3, 40)."));
     test('max search 1', expectOutputToBe(session, intervalsPro,  "max(4, 3, R).", ["R = 4"]));
     test('max search 2', expectOutputToBe(session, intervalsPro,  "max(inf, 3, R).", ["R = inf"]));
-    test('max search 3', expectOutputToBe(session, intervalsPro,  "max(ninf, 3, R).", ["R = 3"]));
+    test('max search 3', expectOutputToBe(session, intervalsPro,  "max(-inf, 3, R).", ["R = 3"]));
+    test('max search 4', expectOutputToBe(session, intervalsPro,  "max(-inf, -inf, R).", ["R = - inf"]));
 });
 
 describe("valid/1", () => {
@@ -72,18 +74,94 @@ describe("valid/1", () => {
         session, intervalsPro, "valid(interval(7, 6))."
     ));
     test('invalid 3', expectToBeFalse(
-        session, intervalsPro, "valid(interval(5, ninf))."
+        session, intervalsPro, "valid(interval(5, -inf))."
     ));
     test('invalid 4', expectToBeFalse(
-        session, intervalsPro, "valid(interval(inf, ninf))."
+        session, intervalsPro, "valid(interval(inf, -inf))."
     ));
     test('valid 1', expectToBeTrue(
-        session, intervalsPro, "valid(interval(ninf, 3))."
+        session, intervalsPro, "valid(interval(-inf, 3))."
     ));
     test('valid 2', expectToBeTrue(
         session, intervalsPro, "valid(interval(-6, 3.3))."
     ));
     test('valid 3', expectToBeTrue(
-        session, intervalsPro, "valid(interval(ninf, inf))."
+        session, intervalsPro, "valid(interval(-inf, inf))."
+    ));
+});
+
+describe("intersection/2", () => {
+   test('intersection (0 intervals)', expectToBeTrue(
+       session,
+       intervalsPro,
+       "intersection([], interval(-inf, inf))."
+   ));
+    test('intersection (0 intervals) search', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([], R).",
+        ["R = interval(- inf,inf)"]
+    ));
+
+    test('intersection (1 interval) search 1', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(3, 5)], R).",
+        ["R = interval(3,5)"]
+    ));
+    test('intersection (1 interval) search 2', expectToBeFalse(
+        session,
+        intervalsPro,
+        "intersection([interval(5.0, 5)], R).",
+    ));
+    test('intersection (1 interval) search 3', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(3, inf)], R).",
+        ["R = interval(3,inf)"]
+    ));
+
+    test('intersection (2 intervals) search 1', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(1, 10), interval(2, inf)], R).",
+        ["R = interval(2,10)"]
+    ));
+    test('intersection (2 intervals) search 2', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(1, 10), interval(-inf, 3)], R).",
+        ["R = interval(1,3)"]
+    ));
+    test('intersection (2 intervals) search 3', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(-inf, inf), interval(3, 4)], R).",
+        ["R = interval(3,4)"]
+    ));
+    test('intersection (2 intervals) search 4', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(1, 3), interval(1.4, 1.4)], R).",
+        []
+    ));
+    test('intersection (2 intervals) search 4', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(1, 3), interval(4, 5)], R).",
+        []
+    ));
+    test('intersection (2 intervals) search 4', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(4, 5), interval(1, 3)], R).",
+        []
+    ));
+
+    test('intersection (n intervals) search', expectOutputToBe(
+        session,
+        intervalsPro,
+        "intersection([interval(-inf, 3), interval(-10, inf), interval(-8, 4)], R).",
+        ["R = interval(-8,3)"]
     ));
 });
