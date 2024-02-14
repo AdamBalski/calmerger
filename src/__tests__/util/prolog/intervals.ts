@@ -4,6 +4,7 @@ import {expectOutputToBe, expectToBeFalse, expectToBeTrue} from "../../../app/ut
 
 const pl = require("tau-prolog");
 require("tau-prolog/modules/promises.js")(pl);
+require("tau-prolog/modules/lists.js")(pl);
 const session = pl.create();
 
 describe("num/1", () => {
@@ -163,5 +164,77 @@ describe("intersection/2", () => {
         intervalsPro,
         "intersection([interval(-inf, 3), interval(-10, inf), interval(-8, 4)], R).",
         ["R = interval(-8,3)"]
+    ));
+});
+
+describe('subtract/3', () => {
+    test("subtract (n-0) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(-inf, 2)]), sum([]), R).",
+        ["R = interval(- inf,2)"]
+    ));
+    test("subtract (n-0) search 2", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(inf, -3)]), sum([]), R).",
+        []
+    ));
+    test("subtract (n-0) search 3", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(-inf, 3), interval(4, 5.5)]), sum([]), R).",
+        [
+            "R = interval(- inf,3)",
+            "R = interval(4,5.5)"
+        ]
+    ));
+
+    test("subtract (1-1) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 3)]), sum([interval(-4, -5)]), R).",
+        ["R = interval(1,3)"]
+    ));
+    test("subtract (1-1) search 2", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 2)]), sum([interval(1, 3)]), R).",
+        []
+    ));
+    test("subtract (1-1) search 3", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 10)]), sum([interval(2, 4)]), R).",
+        [
+            "R = interval(1,2)",
+            "R = interval(4,10)"
+        ]
+    ));
+
+    test("subtract (1-n, n>=2) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 10)]), sum([interval(0, 5), interval(5, 4.0), interval(5, 10)]), R).",
+        []
+    ));
+    test("subtract (1-n, n>=2) search 2", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 10)]), sum([interval(0, 5), interval(5, 4.0), interval(6, 10)]), R).",
+        ["R = interval(5,6)"]
+    ));
+    test("subtract (1-n, n>=2) search 3", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 10)]), sum([interval(1, 3), interval(5, 4.0), interval(6, 9)]), R).",
+        ["R = interval(3,5)", "R = interval(4.0,6)", "R = interval(9,10)"]
+    ));
+
+    test("subtract (m - n; m, n >= 1) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "subtract(sum([interval(1, 10), interval(11, 20)]), sum([interval(3, 4), interval(9, 19)]), R).",
+        ["R = interval(1,3)", "R = interval(4,9)", "R = interval(19,20)"]
     ));
 });
