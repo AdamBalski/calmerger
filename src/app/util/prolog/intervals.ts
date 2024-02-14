@@ -84,7 +84,7 @@ negate_to_sum(L, sum(R)) :-
     findall(X, negate(L, X), R).
     
 % common_window_allowlist/2
-% returns an intersection of all sums
+% sum intersection
 % one allowlist case
 common_window_allowlist([sum([A|T])], R) :- 
     (valid(A), A = R)
@@ -110,5 +110,14 @@ common_window_allowlist([A, B|T], R) :-
     T \= [],
     common_window_allowlist([A, B], S),
     common_window_allowlist([sum([S])|T], R).
+    
+    
+% common_window_blocklist/2
+% returns all intervals that are not blocked by any blocklist
+common_window_blocklist([], interval(-inf, inf)).
+common_window_blocklist([L|T], R) :-
+    findall(BL, common_window_blocklist(T, BL), List),
+    subtract(sum(List), L, R),
+    valid(R).
 `;
 export {intervalsPro};

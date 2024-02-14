@@ -331,3 +331,31 @@ describe("common_window_allowlist/2", () => {
         ["R = interval(3,3.5)", "R = interval(5,5.3)", "R = interval(5.4,5.6)"]
     ));
 });
+
+describe("common_window_blocklist/2", () => {
+   test("common_window_blocklist (0 intervals) search 1", expectOutputToBe(
+       session,
+       intervalsPro,
+       "common_window_blocklist([], R).",
+       ["R = interval(- inf,inf)"]
+   ));
+
+   test("common_window_blocklist (1 list) search 1", expectOutputToBe(
+       session,
+       intervalsPro,
+       "common_window_blocklist([sum([interval(1, 2), interval(3, 4)])], R).",
+       ["R = interval(- inf,1)", "R = interval(2,3)", "R = interval(4,inf)"]
+   ));
+
+    test("common_window_blocklist (3 lists) search 1", expectOutputToBe(session, intervalsPro, `common_window_blocklist([
+            sum([interval(1, 2), interval(3, 4)]),
+            sum([interval(5, 6)]),
+            sum([interval(2, 2.7)])
+        ], R).`,
+        [
+            "R = interval(- inf,1)",
+            "R = interval(2.7,3)",
+            "R = interval(4,5)",
+            "R = interval(6,inf)"
+        ]));
+});
