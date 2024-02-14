@@ -238,3 +238,96 @@ describe('subtract/3', () => {
         ["R = interval(1,3)", "R = interval(4,9)", "R = interval(19,20)"]
     ));
 });
+
+describe("negate/2", () => {
+    test("negate (0 intervals) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate(sum([]), R).",
+        ["R = interval(- inf,inf)"]
+    ));
+
+    test("negate (1 interval) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate(sum([interval(1, 2)]), R).",
+        ["R = interval(- inf,1)", "R = interval(2,inf)"]
+    ));
+    test("negate (1 interval) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate(sum([interval(-inf, 2)]), R).",
+        ["R = interval(2,inf)"]
+    ));
+    test("negate (1 interval) search 3", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate(sum([interval(-inf, inf)]), R).",
+        []
+    ));
+
+    test("negate (n intervals) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate(sum([interval(0, 1), interval(2, 3)]), R).",
+        ["R = interval(- inf,0)", "R = interval(1,2)", "R = interval(3,inf)"]
+    ));
+});
+
+describe("negate_to_sum/2", () => {
+    test("negate_to_sum search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "negate_to_sum(sum([interval(0, 1), interval(2, 3)]), R).",
+        ["R = sum([interval(- inf,0),interval(1,2),interval(3,inf)])"]
+    ));
+});
+
+describe("common_window_allowlist/2", () => {
+    test("common_window_allowlist (1) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "common_window_allowlist([sum([interval(1, 2), interval(3, 4), interval(5, 5)])], R).",
+        ["R = interval(1,2)", "R = interval(3,4)"]
+    ));
+
+    test("common_window_allowlist (2) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        `common_window_allowlist([
+            sum([interval(1, 2), interval(3, 4)]),
+            sum([interval(1, 6)])
+        ], R).`,
+        ["R = interval(1,2)", "R = interval(3,4)"]
+    ));
+
+    test("common_window_allowlist (2) search 2", expectOutputToBe(
+        session,
+        intervalsPro,
+        `common_window_allowlist([
+            sum([interval(1, 2), interval(3, 4), interval(5, 4)]),
+            sum([interval(1, 6)])
+        ], R).`,
+        ["R = interval(1,2)", "R = interval(3,4)"]
+    ));
+    test("common_window_allowlist (2) search 3", expectOutputToBe(
+        session,
+        intervalsPro,
+        `common_window_allowlist([
+            sum([interval(1, 2), interval(3, 4), interval(5, 5.6)]),
+            sum([interval(2.5, 3.5), interval(4.5, 6)])
+        ], R).`,
+        ["R = interval(3,3.5)", "R = interval(5,5.6)"]
+    ));
+
+    test("common_window_allowlist (n, m times) search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        `common_window_allowlist([
+            sum([interval(1, 2), interval(3, 4), interval(5, 5.6)]),
+            sum([interval(2.5, 3.5), interval(4.5, 6)]),
+            sum([interval(2.75, 5.3), interval(5.4, inf)])
+        ], R).`,
+        ["R = interval(3,3.5)", "R = interval(5,5.3)", "R = interval(5.4,5.6)"]
+    ));
+});
