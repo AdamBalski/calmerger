@@ -359,3 +359,60 @@ describe("common_window_blocklist/2", () => {
             "R = interval(6,inf)"
         ]));
 });
+
+describe("transpose_n_by_2_array/2", () => {
+   test("transpose_n_by_2_array empty search 1", expectOutputToBe(
+       session,
+       intervalsPro,
+       "transpose_n_by_2_array([[], []], R).",
+       ["R = []"]
+   ));
+    test("transpose_n_by_2_array empty reverse search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "transpose_n_by_2_array(R, []).",
+        ["R = [[],[]]"]
+    ));
+
+    test("transpose_n_by_2_array search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+    "transpose_n_by_2_array([[1, 3, 5], [2, 4, 6]], R).",
+        ["R = [[1,2],[3,4],[5,6]]"]
+    ));
+    test("transpose_n_by_2_array reverse search 1", expectOutputToBe(
+        session,
+        intervalsPro,
+        "transpose_n_by_2_array(R, [[1, 2], [3, 4], [5, 6]]).",
+        ["R = [[1,3,5],[2,4,6]]"]
+    ));
+    test("transpose_n_by_2_array reverse search 2", expectOutputToBe(
+        session,
+        intervalsPro,
+        `transpose_n_by_2_array([Allowlist, Blocklist], [[
+            sum([interval(8, 22)]),
+            sum([interval(10, 13), interval(15, 17)])
+        ]]).`,
+        ["Allowlist = [sum([interval(8,22)])], " +
+        "Blocklist = [sum([interval(10,13),interval(15,17)])]"]
+    ));
+});
+
+describe("common_window/2", () => {
+    test("common_window (0 people) search", expectOutputToBe(
+        session,
+        intervalsPro,
+        "common_window([[], []], R).",
+        []
+    ));
+
+    test("common_window (1 person) search", expectOutputToBe(
+        session,
+        intervalsPro,
+        `common_window([[
+            sum([interval(8, 22)]),
+            sum([interval(10, 13), interval(15, 17)])
+        ]], R).`,
+        ["R = interval(8,10)", "R = interval(13,15)", "R = interval(17,22)"]
+    ));
+});

@@ -119,5 +119,23 @@ common_window_blocklist([L|T], R) :-
     findall(BL, common_window_blocklist(T, BL), List),
     subtract(sum(List), L, R),
     valid(R).
+    
+
+% common_window/2
+% takes: array of two element arrays (allowlist and blocklist) representing
+%           when the people represented by the arrays 
+%           can or cannot schedule another event
+% returns: all intervals when the people can schedule another event
+
+% transpose_n_by_2_array/2 (used only by common_window/2)
+transpose_n_by_2_array([[], []], []).
+transpose_n_by_2_array([[A|T1], [B|T2]], [[A, B]| T3]) :-
+    transpose_n_by_2_array([T1, T2], T3).
+common_window(List, R) :-
+    transpose_n_by_2_array([Allowlist, Blocklist], List),
+    findall(OneAllowed, common_window_allowlist(Allowlist, OneAllowed), AllAllowed),
+    findall(OneNotBlocked, common_window_blocklist(Blocklist, OneNotBlocked), AllNotBlocked),
+    negate_to_sum(sum(AllNotBlocked), sum(AllBlocked)),
+    subtract(sum(AllAllowed), sum(AllBlocked), R).
 `;
 export {intervalsPro};
